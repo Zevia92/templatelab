@@ -41,13 +41,17 @@ export async function POST(request) {
 
         const plan = planMap[subscription.items.data[0]?.price?.id] || 'starter'
 
+        const periodEnd = subscription.current_period_end
+          ? new Date(subscription.current_period_end * 1000).toISOString()
+          : null
+
         const { error } = await supabase.from('subscriptions').upsert({
           user_id: userId,
           stripe_customer_id: customerId,
           stripe_subscription_id: subId,
           plan,
           status: subscription.status,
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+          current_period_end: periodEnd,
         }, { onConflict: 'stripe_subscription_id' })
 
         if (error) throw error
@@ -62,12 +66,12 @@ export async function POST(request) {
     case 'customer.subscription.deleted': {
       try {
         const sub = event.data.object
+        const periodEnd = sub.current_period_end
+          ? new Date(sub.current_period_end * 1000).toISOString()
+          : null
         const { error } = await supabase
           .from('subscriptions')
-          .update({
-            status: sub.status,
-            current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-          })
+          .update({ status: sub.status, current_period_end: periodEnd })
           .eq('stripe_subscription_id', sub.id)
 
         if (error) throw error
