@@ -1,0 +1,99 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--accent);
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.links a {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.links a:hover {
+  color: var(--text);
+}
+
+.btn {
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btnGhost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btnGhost:hover {
+  background: var(--bg-alt);
+  color: var(--text);
+}
+
+.btnPrimary {
+  background: var(--accent-gradient);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.btnPrimary:hover {
+  box-shadow: var(--shadow-accent);
+  transform: translateY(-1px);
+}
+
+.userBtn {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem !important;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.userBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent) !important;
+}
+
+@media (max-width: 640px) {
+  .links a {
+    display: none;
+  }
+}

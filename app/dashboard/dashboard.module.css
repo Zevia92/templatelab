@@ -1,0 +1,154 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 64px 24px;
+}
+
+.inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.email {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 40px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  margin-bottom: 32px;
+}
+
+.cardTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+}
+
+.active {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: var(--success-bg);
+  color: var(--success);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.planName {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 12px 0 4px;
+}
+
+.planMeta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.noSub {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.noSub p {
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.btn {
+  display: inline-flex;
+  padding: 12px 28px;
+  background: var(--accent-gradient);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  box-shadow: var(--shadow-accent);
+  transform: translateY(-1px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.templateCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.templateName {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.templateFormat {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.downloadBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  transition: all 0.2s;
+}
+
+.downloadBtn:hover {
+  box-shadow: var(--shadow-accent);
+}
+
+.loading {
+  text-align: center;
+  padding: 80px 0;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+}
