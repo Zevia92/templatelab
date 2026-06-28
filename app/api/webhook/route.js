@@ -21,51 +21,60 @@ export async function POST(request) {
 
   switch (event.type) {
     case 'checkout.session.completed': {
-      const session = event.data.object
-      const userId = session.client_reference_id
-      const subId = session.subscription
-      const customerId = session.customer
+      try {
+        const session = event.data.object
+        const userId = session.client_reference_id
+        const subId = session.subscription
+        const customerId = session.customer
 
-      if (!subId || !userId) break
+        if (!subId || !userId) break
 
-      const subscription = await stripe.subscriptions.retrieve(subId)
+        const subscription = await stripe.subscriptions.retrieve(subId)
 
-      const planMap = {}
-      for (const item of subscription.items.data) {
-        const priceId = item.price.id
-        if (priceId.includes('TmwzI')) planMap[priceId] = 'starter'
-        else if (priceId.includes('Tmx3Y')) planMap[priceId] = 'pro'
-        else if (priceId.includes('Tmx5y')) planMap[priceId] = 'unlimited'
+        const planMap = {}
+        for (const item of subscription.items.data) {
+          const priceId = item.price.id
+          if (priceId.includes('TmwzI')) planMap[priceId] = 'starter'
+          else if (priceId.includes('Tmx3Y')) planMap[priceId] = 'pro'
+          else if (priceId.includes('Tmx5y')) planMap[priceId] = 'unlimited'
+        }
+
+        const plan = planMap[subscription.items.data[0]?.price?.id] || 'starter'
+
+        const { error } = await supabase.from('subscriptions').upsert({
+          user_id: userId,
+          stripe_customer_id: customerId,
+          stripe_subscription_id: subId,
+          plan,
+          status: subscription.status,
+          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+        }, { onConflict: 'stripe_subscription_id' })
+
+        if (error) throw error
+      } catch (err) {
+        console.error('checkout.session.completed error:', err)
+        return Response.json({ error: err.message }, { status: 500 })
       }
-
-      const plan = planMap[subscription.items.data[0]?.price?.id] || 'starter'
-
-      await supabase.from('subscriptions').upsert({
-        user_id: userId,
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subId,
-        plan,
-        status: subscription.status,
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-      }, {
-        onConflict: 'stripe_subscription_id',
-      })
-
       break
     }
 
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted': {
-      const sub = event.data.object
+      try {
+        const sub = event.data.object
+        const { error } = await supabase
+          .from('subscriptions')
+          .update({
+            status: sub.status,
+            current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+          })
+          .eq('stripe_subscription_id', sub.id)
 
-      await supabase
-        .from('subscriptions')
-        .update({
-          status: sub.status,
-          current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-        })
-        .eq('stripe_subscription_id', sub.id)
-
+        if (error) throw error
+      } catch (err) {
+        console.error('subscription update error:', err)
+        return Response.json({ error: err.message }, { status: 500 })
+      }
       break
     }
 
