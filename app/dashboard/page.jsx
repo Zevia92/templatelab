@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import templates from '@/lib/templates.js'
 import styles from './dashboard.module.css'
 
@@ -40,6 +41,10 @@ export default function DashboardPage() {
   return (
     <div className={styles.page}>
       <div className={styles.inner}>
+        <Link href="/" className={styles.back}>
+          <ArrowLeft size={18} />
+          Retour à l'accueil
+        </Link>
         <h1 className={styles.title}>Mon compte</h1>
         <p className={styles.email}>{data.user.email}</p>
 

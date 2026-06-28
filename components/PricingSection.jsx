@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import PricingCard from './PricingCard.jsx'
 import { PRICES } from '@/lib/prices.js'
 import styles from './PricingSection.module.css'
@@ -49,6 +52,19 @@ const plans = [
 ]
 
 export default function PricingSection() {
+  const [currentPlan, setCurrentPlan] = useState(null)
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.subscription?.status === 'active') {
+          setCurrentPlan(data.subscription.plan)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <section id="offres" className={styles.section}>
       <div className={styles.header}>
@@ -59,7 +75,7 @@ export default function PricingSection() {
       </div>
       <div className={styles.grid}>
         {plans.map((plan) => (
-          <PricingCard key={plan.name} {...plan} />
+          <PricingCard key={plan.name} {...plan} currentPlan={currentPlan} />
         ))}
       </div>
     </section>
