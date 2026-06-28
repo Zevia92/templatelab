@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-server.js'
+import { createAdminClient } from '@/lib/supabase-admin.js'
 
 export async function GET() {
   const supabase = await createClient()
@@ -9,7 +10,9 @@ export async function GET() {
     return Response.json({ user: null, subscription: null })
   }
 
-  const { data: subscription } = await supabase
+  const admin = createAdminClient()
+
+  const { data: subscription } = await admin
     .from('subscriptions')
     .select('*')
     .eq('user_id', user.id)
