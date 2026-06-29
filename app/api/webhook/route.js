@@ -44,11 +44,15 @@ export async function POST(request) {
         if (!subId) break
 
         // Vérifier si l'utilisateur existe dans Supabase (TemplateLab)
-        const { data: existingUser } = await supabase
-          .from('users')
-          .select('id')
-          .eq('id', userId)
-          .maybeSingle()
+        let existingUser = null
+        try {
+          const { data } = await supabase
+            .from('users')
+            .select('id')
+            .eq('id', userId)
+            .maybeSingle()
+          existingUser = data
+        } catch {}
 
         const subscription = await stripe.subscriptions.retrieve(subId)
 
