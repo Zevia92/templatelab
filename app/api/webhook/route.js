@@ -3,6 +3,20 @@ import { createAdminClient } from '@/lib/supabase-admin.js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
+const yggflixWebhookUrl = process.env.YGGFLLX_WEBHOOK_URL
+const yggflixApiSecret = process.env.YGGFLLX_API_SECRET
+
+async function forwardToYggflix(eventType, subscription) {
+  if (!yggflixWebhookUrl || !yggflixApiSecret) return
+  await fetch(yggflixWebhookUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': yggflixApiSecret,
+    },
+    body: JSON.stringify({ 'event-type': eventType, subscription }),
+  })
+}
 
 export async function POST(request) {
   const body = await request.text()
@@ -27,10 +41,29 @@ export async function POST(request) {
         const subId = session.subscription
         const customerId = session.customer
 
-        if (!subId || !userId) break
+        if (!subId) break
+
+        // Vérifier si l'utilisateur existe dans Supabase (TemplateLab)
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('id', userId)
+          .maybeSingle()
 
         const subscription = await stripe.subscriptions.retrieve(subId)
 
+        if (!existingUser) {
+          // Client YggFlix → désactiver emails Stripe + forwarder
+          if (customerId) {
+            await stripe.customers.update(customerId, {
+              invoice_settings: { email_settings: { enabled: false } },
+            }).catch(() => {})
+          }
+          await forwardToYggflix(event.type, subscription)
+          break
+        }
+
+        // Client TemplateLab → écrire dans Supabase
         const planMap = {}
         for (const item of subscription.items.data) {
           const priceId = item.price.id
@@ -66,6 +99,21 @@ export async function POST(request) {
     case 'customer.subscription.deleted': {
       try {
         const sub = event.data.object
+
+        // Vérifier si l'abonnement existe dans Supabase (TemplateLab)
+        const { data: existingSub } = await supabase
+          .from('subscriptions')
+          .select('id')
+          .eq('stripe_subscription_id', sub.id)
+          .maybeSingle()
+
+        if (!existingSub) {
+          // Client YggFlix → forwarder
+          await forwardToYggflix(event.type, sub)
+          break
+        }
+
+        // Client TemplateLab → mettre à jour Supabase
         const periodEnd = sub.current_period_end
           ? new Date(sub.current_period_end * 1000).toISOString()
           : null
