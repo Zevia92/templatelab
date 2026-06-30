@@ -6,16 +6,17 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
 const yggflixWebhookUrl = process.env.YGGFLLX_WEBHOOK_URL
 const yggflixApiSecret = process.env.YGGFLLX_API_SECRET
 
-async function forwardToYggflix(eventType, subscription) {
+async function forwardToYggflix(eventType, subscription, clientRefId) {
   if (!yggflixWebhookUrl || !yggflixApiSecret) return
-  await fetch(yggflixWebhookUrl, {
+  const res = await fetch(yggflixWebhookUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': yggflixApiSecret,
     },
-    body: JSON.stringify({ 'event-type': eventType, subscription }),
+    body: JSON.stringify({ 'event-type': eventType, subscription, client_reference_id: clientRefId }),
   })
+  if (!res.ok) console.error('YggFlix webhook forward failed:', res.status, await res.text())
 }
 
 export async function POST(request) {
@@ -63,7 +64,7 @@ export async function POST(request) {
               invoice_settings: { email_settings: { enabled: false } },
             }).catch(() => {})
           }
-          await forwardToYggflix(event.type, subscription)
+          await forwardToYggflix(event.type, subscription, session.client_reference_id)
           break
         }
 
@@ -113,7 +114,7 @@ export async function POST(request) {
 
         if (!existingSub) {
           // Client YggFlix → forwarder
-          await forwardToYggflix(event.type, sub)
+          await forwardToYggflix(event.type, sub, null)
           break
         }
 
