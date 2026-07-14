@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { createAdminClient } from '@/lib/supabase-admin.js'
+import { PRICES } from '@/lib/prices.js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -70,11 +71,13 @@ export async function POST(request) {
 
         // Client TemplateLab → écrire dans Supabase
         const planMap = {}
+        const priceToPlan = Object.entries(PRICES).reduce((acc, [plan, id]) => {
+          if (id) acc[id] = plan
+          return acc
+        }, {})
         for (const item of subscription.items.data) {
           const priceId = item.price.id
-          if (priceId.includes('Ts4ER')) planMap[priceId] = 'starter'
-          else if (priceId.includes('Tmx3Y')) planMap[priceId] = 'pro'
-          else if (priceId.includes('Tmx5y')) planMap[priceId] = 'unlimited'
+          if (priceToPlan[priceId]) planMap[priceId] = priceToPlan[priceId]
         }
 
         const plan = planMap[subscription.items.data[0]?.price?.id] || 'starter'
