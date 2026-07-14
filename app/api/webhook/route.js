@@ -71,7 +71,7 @@ export async function POST(request) {
         const planMap = {}
         for (const item of subscription.items.data) {
           const priceId = item.price.id
-          if (priceId.includes('TmwzI')) planMap[priceId] = 'starter'
+          if (priceId.includes('Ts4ER')) planMap[priceId] = 'starter'
           else if (priceId.includes('Tmx3Y')) planMap[priceId] = 'pro'
           else if (priceId.includes('Tmx5y')) planMap[priceId] = 'unlimited'
         }
